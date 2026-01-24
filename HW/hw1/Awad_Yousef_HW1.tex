@@ -1,0 +1,140 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{Yousef Alaa Awad}
+\chead{\hmwkClass\: \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{January 23, 2026}
+\newcommand{\hmwkClass}{Advanced Computer Architecture}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}
+    \vspace{3in}
+}
+
+\author{Yousef Alaa Awad}
+
+% Problems start here
+\begin{document}
+
+\maketitle
+\pagebreak
+
+\section{1: Perspective}
+
+\subsection{A) Do you think Moore’s law is still applicable today? Why? (less than 200 words)}
+I think that Moore's law is applicable today. I think this due to the fact that, despite the marketing via Nvidia and Jensen Huang, when you graph the complexity of a chip to the time that it has been, even now we are managing to fit more and more complex and dense transistors per chip even in 2025, and the start of 2026. Alongside this, I want to bring up the fact that I am quite optimistic with the future of the semiconducting field, and positive (though only due to hope and not any real evidence), that since we keep on finding areas where we can't fit more transistors per area, that we can innovate our way out, via the 3d push that's been going on with Intel's now in-production new fabs/panther lake design as well as the other research that is occurring in the field.
+
+\subsection{B) Please introduce the most interesting house or architecture you have ever seen. Why is it so interesting to you? (less than 200 words)}
+The most interesting house that I have seen is the house that exists down the street where my parents live. It's a medieval gothic villa style of house that looks almost as if it was a tiny house. It's interesting to me since I personally have a lot of preference to the medieval, almost over the top but not (if that makes sense), subtle architecture that occurs, with stone carvings, to the gardens on the outside, to even how the wood on the walls that you see on the outside complements the subtle greys that the bricks give out.
+
+\section{2: Technology Scaling and Performance Measurement}
+
+\subsection{A) Suppose that instead of progressing at a ratio of 0.7, Moore’s law slows down and transistor gate length scales at a ratio of 0.8. Find the dynamic power consumption under unlimited and limited scaling for the next process generation.}
+Now, for the unlimited scaling we get the following variables/changes:
+\begin{itemize}
+  \item Transistor Size: $S = 0.8$
+  \item Capacitance: $S = 0.8$
+  \item Area: $S^2 = (0.8)^2 = 0.64$ therefore $Num_{transistors} = \frac{1}{S^2} = 1.56$
+  \item Supply Voltage: $S = 0.8$
+  \item Frequency: $\frac{1}{S} = \frac{1}{0.8} = 1.25$
+\end{itemize}
+And with the following then, the dynamic power would be the following:
+$$ Dynamic\ Power = ACV^2f \rightarrow Dynamic\ Power' = A'C'(V')^2f' $$
+$$ Dynamic\ Power' = (1.56*A)(0.8*C)(0.8*V)^2(1.25*f) = ACV^2f $$
+Therefore, the next generation will have the same dynamic power as the old one all the while having improvements. For the limited scaling, it would be like the following:
+\begin{itemize}
+  \item Transistor Size: $S = 0.8$
+  \item Capacitance: $S = 0.8$
+  \item Area: $S^2 = (0.8)^2 = 0.64$ therefore $Num_{transistors} = \frac{1}{S^2} = 1.56$
+  \item Supply Voltage: Cannot Scale :(
+  \item Frequency: $\frac{1}{S} = \frac{1}{0.8} = 1.25$
+\end{itemize}
+And with the following then, the dynamic power would be the following:
+$$ Dynamic\ Power = ACV^2f \rightarrow Dynamic\ Power' = A'C'(V')^2f' $$
+$$ Dynamic\ Power' = (1.56*A)(0.8*C)V^2(1.25*f) = 1.56*ACV^2f = 1.56*(Dynamic\ Power) $$
+Which therefore means that the next generation will have 1.56 times more dynamic power consumption than that of the previous generation.
+
+\subsection{B) With limited voltage scaling (at a ratio of 0.8), suppose that we want to keep the dynamic power consumption constant in the next generation by keeping frequency constant and reduce die area. How much should we reduce die area to achieve that?}
+Now, if we have limited voltage scaling we would have the following constant changes to the next generation:
+\begin{itemize}
+  \item Transistor Size: $S = 0.8$
+  \item Capacitance: $S = 0.8$
+  \item Area: $S^2 = (0.8)^2 = 0.64$
+  \item Supply Voltage + Frequency are both constant!
+\end{itemize}
+Therefore...
+$$ Dynamic\ Power = ACV^2f \rightarrow Dynamic\ Power' = A'C'(V')^2f' $$
+$$ Dynamic\ Power' = (A')(0.8*C)V^2(f) = 0.8*A'CV^2f \rightarrow A = 0.8*A'$$
+Now, since $A' = 1.25A$, then with the same die size you can have... 1.5625*A transistors. Now, to calculate how much we therefore need to shrink the die area we do the following math:
+$$ Die\ Area\ Shrink = 1 - \frac{1.25}{1.5625} = 1 - 0.8 = 0.2 == 20\% $$
+Meaning we need to shrink the die area to 25\% the size to ensure the same dynamic power.
+
+\pagebreak
+\subsection{C) What is the speedup of the basic pipeline (without bypassing) shown in the Introduction slides (Tsequential / Tpipelined) if 1/5 of all instructions contain a data dependence? Can you give a general formula for a k-stage pipeline? What other information do you need to know?}
+Now, we will assume we have 100 instruction.
+$$ T_{sequential} = 100 * 5\ cycles = 500\ cycles $$
+$$ T_{pipelined\ no\ stalls} = 100 * 1\ cycles = 100\ cycles $$
+$$ T_{pipelined\ with\ stalls} = 20 * 2\ cycles = 40\ cycle\ delay $$
+$$ T_{pipelined} = 100 + 40 = 140 $$
+Therefore the speedup will be:
+$$ Speedup = \frac{T_{sequential}}{T_{pipelined}} = \frac{500}{140} = 3.57\text{x Speedup} $$
+Now, sadly we cannot give the general \textit{k}-stage pipeline due to the fact that we do not know when exactly the execute stage produces a result and when exactly the operands are read in the pipeline.
+
+\subsection{D) What is the speedup of the basic pipeline (with branch predictions) shown in the Introduction slides (Tsequential / Tpipelined) if 1/5 of all instructions are conditional branches and 4/5 of them are predicted incorrectly? Can you give a general formula for a k-stage pipeline? What other information do you need to know?}
+Now, for this we do the following calculations...
+$$ T_{sequential} = 100*5 = 500\ cycles $$
+$$ T_{pipelined\ no\ stalls} = 100*1 = 100\ cycles $$
+Now, for with stalls, we have a total of 20 branch, of which 4 are correctly guessed incurring no stall, BUT 16 are guessed incorrectly incurring $16*2 = 32$ cycles penalty. This therefore means we have the following speedup:
+$$ Speedup = \frac{T_{sequential}}{T_{pipelined}} = \frac{500}{100 + 32} = \frac{500}{132} = 3.79\text{x Speedup} $$
+Now, for the \textit{k}-stage pipeline, we sadly cannot give a general formula due to the fact that we do not know which pipeline stage resolves the branch specifically.
+
+\end{document}
