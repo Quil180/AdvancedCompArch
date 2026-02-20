@@ -1,0 +1,139 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+
+\usetikzlibrary{automata,positioning}
+
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{Yousef Alaa Awad}
+\chead{\hmwkClass\: \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+
+\newcommand{\hmwkTitle}{Homework\ \#2}
+\newcommand{\hmwkDueDate}{February 6, 2026}
+\newcommand{\hmwkClass}{Advanced Computer Architecture}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}
+    \vspace{3in}
+}
+
+\author{Yousef Alaa Awad}
+
+% Problems start here
+\begin{document}
+
+\maketitle
+\pagebreak
+
+\section{1: Performance}
+Suppose that we have two machines A and B. The following table shows the execution times for programs that make up a benchmark suite for machine A, machine B, and a reference machine X.
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    Program & Exec time of X & Exec time of A & Exec time of B \\ \hline
+    P1      & 120            & 40             & 20             \\ \hline
+    P2      & 300            & 100            & 150            \\ \hline
+    P3      & 50             & 5              & 10             \\ \hline
+    P4      & 150            & 25             & 30             \\ \hline
+    P5      & 90             & 10             & 15             \\ \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Calculate the overall speedup of machine A versus reference machine X, using geometric mean.}
+First we have to find the relative speedup from x of every program's execution time to machine A and B.
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    Program & Exec time of X & Exec time of A & Exec time of B \\ \hline
+    P1      & 1x             & 3x             & 6x             \\ \hline
+    P2      & 1x             & 3x             & 2x             \\ \hline
+    P3      & 1x             & 10x            & 5x             \\ \hline
+    P4      & 1x             & 6x             & 5x             \\ \hline
+    P5      & 1x             & 9x             & 6x             \\ \hline
+  \end{tabular}
+\end{table}
+Now, given the Geometric Mean equation below...
+$$ Geometric\ Mean = \sqrt[n]{\left( \prod_{i=1}^{n} x_i \right)} $$
+We can calculate the Geometric Mean for machine A, and machine B:
+\begin{align*}
+  GMean_{A} = \sqrt[5]{\left( 3*3*10*6*9 \right)} = \sqrt[5]{\left( 4860 \right)} &= 5.4617 \\
+  GMean_{B} = \sqrt[5]{\left( 6*2*5*5*6 \right)} = \sqrt[5]{\left( 1800 \right)}  &= 4.4777
+\end{align*}
+Therefore, the overall speedup of Machine A vs the reference, X, is 5.4617 times faster, and the overall speedup of Machine B (despite not being asked formally) vs the reference, X, is 4.4777 times faster.
+
+
+\pagebreak
+\section{2: Reliability}
+Consider a VLSI Microprocessor has a failure rate of 400 FITs. If a VLSI microprocessor has $10^5$ transistors, and the transistors have equal failure rates and transistors fail independently from one another.
+
+\subsection{What is the MTTF of a single transistor?}
+Now, we know that...
+$$ \lambda_{transistors} = \frac{\lambda_{total}}{n_{transistors}} = \frac{400 \text{ FITs}}{10^5 \text{ transistors}} = 0.004\ FITs $$
+But now we need to find the "failures per hour" by doing the following:
+$$ \text{failures per hour} = \lambda_{total} * 10^{-9} = 4*10^{-12} \frac{failures}{hour} $$
+Now, we can finally calculate MTTF:
+$$ MTTF = \frac{1}{failures\ per\ hours} = \frac{1}{4*10^{-12}} = 2.5*10^{11} \text{ hours} $$
+
+
+\section{3: Amdahl's Law}
+Your pipeline has one very slow stage that consumes 60\% of the time to process an instruction. You discover that you can speed it up by a factor of 3
+
+\subsection{What is the improvement in the latency?}
+Now, we will have to use this equation for speedup...
+$$ Speedup = \frac{time_{old}}{time_{new}} = \frac{1}{(1-f)+\frac{f}{s}} $$
+Alongside this, we were given the following from the problem proper:
+$$ f = 60\% = 0.6 $$
+$$ s = 3 $$
+Therefore, we simply just plug those values into the speedup equation above!
+$$ Speedup = = \frac{1}{(1-f)+\frac{f}{s}} = \frac{1}{(1-0.6)+\frac{0.6}{3}} = \frac{1}{0.4 + 0.2} = \frac{1}{0.6} = 1.\overbar{66} $$
+Therefore the total improvement in latency is $1.\overbar{66}$ times.
+
+
+\end{document}
