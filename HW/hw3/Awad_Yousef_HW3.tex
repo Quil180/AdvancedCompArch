@@ -1,0 +1,200 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\usetikzlibrary{automata,positioning}
+
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{Yousef Alaa Awad}
+\chead{\hmwkClass\: \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+
+\newcommand{\hmwkTitle}{Homework\ \#2}
+\newcommand{\hmwkDueDate}{February 6, 2026}
+\newcommand{\hmwkClass}{Advanced Computer Architecture}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}
+}
+
+\author{Yousef Alaa Awad}
+
+% --- Define Custom Colors ---
+\definecolor{mipsbg}{HTML}{F8F9FA}         % Light gray background
+\definecolor{mipscomment}{HTML}{228B22}    % Forest Green for comments
+\definecolor{mipsinstr}{HTML}{0055CC}      % Deep Blue for instructions
+\definecolor{mipsdirective}{HTML}{800080}  % Purple for directives
+\definecolor{mipsregister}{HTML}{D2691E}   % Orange/Chocolate for registers
+\definecolor{mipsstring}{HTML}{B22222}     % Firebrick Red for strings
+\definecolor{linegray}{HTML}{A9A9A9}       % Gray for line numbers
+
+% --- Define MIPS Language ---
+\lstdefinelanguage{MIPS}{
+  % Class 1: Instructions (Standard and Pseudo)
+  morekeywords=[1]{add, addi, addu, sub, subu, and, andi, or, ori, xor, xori, nor, sll, srl, sra, sllv, srlv, srav, slt, sltu, slti, sltiu, j, jr, jal, beq, bne, blez, bgtz, bltz, bgez, lw, sw, lb, sb, lh, sh, lui, mfhi, mflo, mult, div, syscall, la, li, move, b, bal, not, nop},
+  % Class 2: Assembler Directives
+  morekeywords=[2]{.align, .ascii, .asciiz, .byte, .data, .double, .extern, .float, .globl, .half, .kdata, .ktext, .space, .text, .word},
+  % Class 3: Registers
+  morekeywords=[3]{\$zero, \$at, \$v0, \$v1, \$a0, \$a1, \$a2, \$a3, \$t0, \$t1, \$t2, \$t3, \$t4, \$t5, \$t6, \$t7, \$s0, \$s1, \$s2, \$s3, \$s4, \$s5, \$s6, \$s7, \$t8, \$t9, \$k0, \$k1, \$gp, \$sp, \$fp, \$ra},
+  % Comments and Strings
+  morecomment=[l]{\#},
+  morestring=[b]",
+  sensitive=false, % MIPS assembly is generally case-insensitive for instructions
+}
+
+% --- Define MIPS Style ---
+\lstdefinestyle{mipsStyle}{
+  language=MIPS,
+  backgroundcolor=\color{mipsbg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=[1]\color{mipsinstr}\bfseries,     % Instructions
+  keywordstyle=[2]\color{mipsdirective}\bfseries, % Directives
+  keywordstyle=[3]\color{mipsregister},           % Registers
+  commentstyle=\color{mipscomment}\itshape,       % Comments
+  stringstyle=\color{mipsstring},                 % Strings
+  numbers=left,
+  numberstyle=\tiny\color{linegray},
+  stepnumber=1,
+  numbersep=10pt,
+  tabsize=4,
+  showspaces=false,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{lightgray},
+  captionpos=b,
+}
+
+% Problems start here
+\begin{document}
+
+\maketitle
+\pagebreak
+
+\section{1: ISA}
+Suppose we have a function that can be described in MIPS assembly as below. Assume that \$a0 is used for the input and initially contains 20, a positive integer. \$v0 is used for returning the output value.
+\begin{center}
+	\begin{minipage}{0.3\textwidth}
+		\begin{lstlisting}[style=mipsStyle]
+begin:
+  addi $t0, $zero, 1
+  addi $t1, $zero, 1
+loop:
+  slt $t2, $a0, $t1
+  bne $t2, $zero, finish
+  add $t0, $t0, $t1
+  addi $t1, $t1, 2
+  j loop
+finish:
+  add $v0, $t0, $zero
+\end{lstlisting}
+	\end{minipage}
+\end{center}
+
+\subsection{Assume we just finished the above program. What are the values in the registers?}
+For this one, I'll be doing a loop table for all 10 loops that will occur until \$a0 is finally less than \$t1 and the loop breaks.
+\begin{table}[h!]
+	\centering
+	\renewcommand{\arraystretch}{1.5} % Adds a bit of padding for readability
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		\textbf{Loop Iteration} & \textbf{\$t0} & \textbf{\$t1} & \textbf{\$t2} & \textbf{\$v0} & \textbf{\$a0} \\
+		\hline
+		Initial                 & 1             & 1             & 0             & 0             & 20            \\
+		\hline
+		1                       & 2             & 3             & 0             & 0             & 20            \\
+		\hline
+		2                       & 5             & 5             & 0             & 0             & 20            \\
+		\hline
+		3                       & 10            & 7             & 0             & 0             & 20            \\
+		\hline
+		4                       & 17            & 9             & 0             & 0             & 20            \\
+		\hline
+		5                       & 26            & 11            & 0             & 0             & 20            \\
+		\hline
+		6                       & 37            & 13            & 0             & 0             & 20            \\
+		\hline
+		7                       & 50            & 15            & 0             & 0             & 20            \\
+		\hline
+		8                       & 65            & 17            & 0             & 0             & 20            \\
+		\hline
+		9                       & 82            & 19            & 0             & 0             & 20            \\
+		\hline
+		\textbf{10}             & \textbf{101}  & \textbf{21}   & \textbf{1}    & \textbf{101}  & \textbf{20}   \\
+		\hline
+	\end{tabular}
+	\caption{Register trace across 10 loops.}
+\end{table}
+\newline
+Therefore the final loop marker of 10 is the final values of the registers.
+
+\pagebreak
+\section{2: ISA}
+Suppose that we would like to compute:
+$$ C = A + B $$
+$$ A = C - B $$
+
+\subsection{Assume that all of A, B, C, and D are initially in memory. What is the correct sequence of instructions in the Stack ISA?}
+It would look like the following:
+\begin{center}
+	\begin{minipage}{0.7\textwidth}
+		\begin{lstlisting}
+PUSH A # Push A into stack
+PUSH B # Push B ontop of stack
+ADD    # add the top 2 stack items (A, B)
+POP C  # Pop the top item of the stack (A + B) into C
+PUSH C # Push C into Stack
+PUSH B # Push B onto stack
+SUB    # Subtract B from C 
+POP A  # Pop from stack into A
+\end{lstlisting}
+	\end{minipage}
+\end{center}
+
+\end{document}
