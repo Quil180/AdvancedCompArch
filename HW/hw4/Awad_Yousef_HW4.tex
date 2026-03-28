@@ -1,0 +1,170 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+
+\usetikzlibrary{automata,positioning}
+
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{Yousef Alaa Awad}
+\chead{\hmwkClass\: \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\setcounter{secnumdepth}{0}
+
+\newcommand{\hmwkTitle}{Assignment\ \#4}
+\newcommand{\hmwkClass}{CDA 5106}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}
+}
+
+\author{Yousef Alaa Awad}
+
+\begin{document}
+
+\maketitle
+\pagebreak
+
+\section{1. Cache Placement and Replacement}
+\textbf{Problem Statement:} We are given a processor with a two-level cache hierarchy. The L1 cache is direct-mapped with two lines, where blocks A, B, C, D map to Line 0, and U, V, W, X map to Line 1. The L2 cache is fully associative with four lines. Both utilize the LRU replacement policy. The L2 cache is non-inclusive of the L1 cache.
+
+\subsection{Access Outcomes}
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Access} & \textbf{Outcome for L1} & \textbf{Outcome for L2} \\
+		\hline
+		A               & Miss                    & Miss                    \\
+		\hline
+		V               & Miss                    & Miss                    \\
+		\hline
+		U               & MR-V                    & Miss                    \\
+		\hline
+		B               & MR-A                    & Miss                    \\
+		\hline
+		A               & MR-B                    & Hit                     \\
+		\hline
+		D               & MR-A                    & MR-V                    \\
+		\hline
+		C               & MR-D                    & MR-U                    \\
+		\hline
+		A               & MR-C                    & Hit                     \\
+		\hline
+		B               & MR-A                    & Hit                     \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\textit{Note on Access C:} The L2 cache becomes full with blocks A, V, U, B. The LRU accesses determine eviction. When D is accessed, V is evicted from L2. When C is accessed, U is the LRU block in L2 and is evicted. Because the cache is non-inclusive, the eviction of U from L2 does \textbf{not} trigger a back-invalidation of U in the L1 cache. U remains valid in L1 Line 1.
+
+\subsection{Final Cache Contents}
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{L1 Cache} & \textbf{Which Block?} & \textbf{What State?} \\
+		\hline
+		Line 0            & B                     & Valid                \\
+		\hline
+		Line 1            & U                     & Valid                \\
+		\hline
+		\textbf{L2 Cache} & \textbf{Which Block?} & \textbf{What State?} \\
+		\hline
+		Line 0            & A                     & Valid                \\
+		\hline
+		Line 1            & B                     & Valid                \\
+		\hline
+		Line 2            & C                     & Valid                \\
+		\hline
+		Line 3            & D                     & Valid                \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\pagebreak
+
+\section{2. Cache Performance}
+
+\subsection{(a) Average Memory Access Time (AMAT)}
+Using the standard baseline parameters: $t_{L1} = 2$, $MR_{L1} = 20\%$, $t_{L2} = 15$, $MR_{L2} = 8\%$, and $t_{mem} = 90$.
+\begin{align*}
+	AMAT & = t_{L1} + MR_{L1} \times (t_{L2} + MR_{L2} \times t_{mem}) \\
+	AMAT & = 2 + 0.20 \times (15 + 0.08 \times 90)                     \\
+	AMAT & = 2 + 0.20 \times (15 + 7.2)                                \\
+	AMAT & = 2 + 0.20 \times 22.2                                      \\
+	AMAT & = 2 + 4.44 = \mathbf{6.44 \text{ clock cycles}}
+\end{align*}
+
+\subsection{(b) AMAT with Computation Overlap and Memory Level Parallelism}
+We must first calculate the effective latency for each memory hierarchy level by discounting the overlapped time and dividing by the number of simultaneous references.
+\begin{align*}
+	t_{L1,eff}  & = \frac{t_{L1} \times (1 - \text{Overlap}_{L1})}{\text{Refs}_{L1}} = \frac{2 \times (1 - 0.80)}{3} = \frac{0.4}{3} \approx 0.1333 \text{ cycles}  \\[10pt]
+	t_{L2,eff}  & = \frac{t_{L2} \times (1 - \text{Overlap}_{L2})}{\text{Refs}_{L2}} = \frac{15 \times (1 - 0.40)}{2.5} = \frac{9.0}{2.5} = 3.6 \text{ cycles}      \\[10pt]
+	t_{mem,eff} & = \frac{t_{mem} \times (1 - \text{Overlap}_{mem})}{\text{Refs}_{mem}} = \frac{90 \times (1 - 0.10)}{1.5} = \frac{81.0}{1.5} = 54.0 \text{ cycles}
+\end{align*}
+
+Now, applying these effective latencies to the AMAT formula:
+\begin{align*}
+	AMAT_{eff} & = t_{L1,eff} + MR_{L1} \times (t_{L2,eff} + MR_{L2} \times t_{mem,eff}) \\
+	AMAT_{eff} & = 0.1333 + 0.20 \times (3.6 + 0.08 \times 54)                           \\
+	AMAT_{eff} & = 0.1333 + 0.20 \times (3.6 + 4.32)                                     \\
+	AMAT_{eff} & = 0.1333 + 0.20 \times 7.92                                             \\
+	AMAT_{eff} & = 0.1333 + 1.584 = 1.7173 \approx \mathbf{1.72 \text{ clock cycles}}
+\end{align*}
+
+\subsection{(c) Calculate the CPI}
+The perfect-cache CPI ($CPI_{perfect}$) of 0.5 is defined as having a 0-cycle access time. Therefore, we do not subtract the effective L1 hit time; the entirety of the effective AAT contributes to the final CPI.
+
+Given that 25\% of all instructions are memory references (loads/stores):
+\begin{align*}
+	CPI & = CPI_{perfect} + (\text{Memory Refs per Instruction} \times AAT) \\
+	CPI & = 0.5 + 0.25 \times 1.7173                                               \\
+	CPI & = 0.9293 \approx \mathbf{0.93}
+\end{align*}
+
+\end{document}
