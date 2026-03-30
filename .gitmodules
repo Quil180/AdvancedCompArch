@@ -1,0 +1,3 @@
+[submodule "ResearchProject"]
+	path = ResearchProject
+	url = git@github.com:Meowcaroni/cda5106-gshare-bnn-predictor.git
