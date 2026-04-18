@@ -1,0 +1,3 @@
+*.o
+validation_output
+sim_cache
