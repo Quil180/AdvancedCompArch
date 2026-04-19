@@ -1,0 +1,91 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{amsmath}
+
+% Include the graphs.tex from the parent directory in the preamble
+% to load pgfplots and define the plot commands.
+\input{graphs.tex}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Large University of Central Florida \par}
+    {\Large Department of Computer Science \par}
+    {\Large CDA 5106: Spring 2026 \par}
+    \vspace{2cm}
+    {\huge\bfseries Machine Problem 1: Cache Design, Memory Hierarchy Design\par}
+    \vspace{2cm}
+    {\Large by\par}
+    \vspace{1cm}
+    {\Large \textbf{Yousef Alaa Awad} \par}
+    \vfill
+    {\scshape\Large Honor Pledge\par}
+    \vspace{0.5cm}
+    {\large ``I have neither given nor received unauthorized aid on this test or assignment.''\par}
+    \vspace{1cm}
+    {\large Student's electronic signature: \textbf{Yousef Alaa Awad}\par}
+    \vspace{2cm}
+\end{titlepage}
+
+\section{Introduction}
+This report details the implementation and analysis of a flexible cache simulator designed to model the behavior of different cache organizations and replacement policies. The simulator processes memory access traces and tracks hits, misses, and overall access times to evaluate performance under varying configurations. Key configurable parameters include cache size, associativity, block size, replacement policy (LRU, FIFO, Optimal), write policy (Write-Back, Write-Allocate), and L2 inclusion properties.
+
+\section{Methodology}
+The experiments and graphs were generated using the parameterized simulator developed in \texttt{C++} and automated script executions. As required by the assignment, all experiments use the GCC benchmark trace (\texttt{gcc\_trace.txt}). The simulator logic accurately tracks L1 and L2 cache behavior, computes miss rates, and calculates Average Access Time (AAT). The calculations utilize hit times dynamically derived from the provided CACTI tool output (\texttt{cacti\_table.xls}), linking specific cache sizes and associativities to precise \texttt{HTL1} and \texttt{HTL2} latencies. A fixed \texttt{Miss\_Penalty} of 100 ns was used for main memory accesses, adhering to the project specifications.
+
+\pagebreak
+\section{Results and Analysis}
+
+\subsection{L1 Cache Size and Associativity Exploration}
+\plotGraphOne[../graph_data/graph1/graph1.csv]
+
+\textbf{Discussion response (Graph 1):}
+
+1) \textbf{Trends in miss rate.} For a fixed associativity, miss rate decreases as cache size increases from 1KB to 1MB. For a fixed cache size, miss rate generally decreases as associativity increases (direct-mapped $\rightarrow$ 2-way $\rightarrow$ 4-way $\rightarrow$ 8-way $\rightarrow$ fully associative). The largest gains are at small cache sizes, and the associativity benefit diminishes at large sizes.
+
+2) \textbf{Estimated compulsory miss rate.} Using the largest fully associative point (1MB), the compulsory component is approximately $2.582\%$.
+
+3) \textbf{Estimated conflict miss rate for each associativity.} We estimate conflict miss rate as:
+\[
+\text{MR}_{\text{conflict}}(S,A) \approx \text{MR}(S,A) - \text{MR}(S,\text{FA}).
+\]
+Across the spectrum of cache sizes, the conflict miss rate is most prominent at small sizes (e.g., 1KB to 8KB) and steadily decreases to near zero for all associativities above 256KB. At 1KB, the estimates are: Direct-mapped $\approx 5.650\%$, 2-way $\approx 1.907\%$, 4-way $\approx 0.574\%$, and 8-way $\approx 0\%$. At a moderate size like 32KB, the conflict miss rates shrink significantly to approximately $1.2\%$ for direct-mapped and $0.2\%$ for 2-way. Finally, at 1MB, all associativities converge to the basic compulsory miss rate ($\approx 2.582\%$), meaning conflict misses are effectively eliminated.
+
+\pagebreak
+\subsection{Impact on Average Access Time (AAT)}
+\plotGraphTwo[../graph_data/graph1/graph2.csv]
+
+\textbf{Discussion response (Graph 2):}
+
+1) \textbf{Best AAT configuration for L1-only hierarchy with BLOCKSIZE=32.} The optimal balance of miss rate reduction and hardware hit-time overhead occurs at a moderate capacity and associativity. The \textbf{32KB 4-way set-associative} configuration yields the best Average Access Time ($\approx 2.9113\,\text{ns}$). While increasing associativity to a fully associative design might minimize the conflict miss rate further, the massive hardware hit-time penalty ($HT_{L1}$) of complex CAM arrays makes the AAT of a larger or fully associative cache much worse in a realistic physical implementation. Thus, 32KB 4-way represents the optimal architectural design point for minimum AAT.
+
+\pagebreak
+\subsection{Replacement Policy Evaluation}
+\plotGraphThree[../graph_data/graph3/graph3.csv]
+
+\textbf{Discussion response (Graph 3):}
+
+1) \textbf{Trends and best replacement policy.} Optimal yields the lowest AAT (theoretical lower bound), FIFO is generally worst, and LRU stays close to Optimal. At 1KB the difference is large (Optimal 10.7558 ns, LRU 14.4168 ns, FIFO 15.5618 ns), while at 128KB and 256KB all three converge to the same AAT. This convergence occurs because at larger capacities, capacity misses disappear and conflict misses are minimal, rendering replacement policies less impactful since fewer evictions occur overall. Therefore, policy choice matters most at small sizes with heavy contention.
+
+\pagebreak
+\subsection{L2 Inclusion Property}
+\plotGraphFour[../graph_data/graph4/graph4.csv]
+
+\textbf{Discussion response (Graph 4):}
+
+1) \textbf{Trends and better inclusion property.} Non-inclusive yields lower AAT for small L2 sizes because inclusive L2 evictions can back-invalidate L1 blocks. The inclusive penalty is about 0.4414 ns at 2KB, 0.0401 ns at 4KB, and 0.0060 ns at 8KB, then drops to zero from 16KB onward. Thus, non-inclusive is better in the small-L2 regime, while both become equivalent for larger L2.
+
+\subsection{Area and Energy Tradeoff Note}
+The assignment also motivates comparing performance with cost. In this report, AAT is computed using CACTI-derived hit times and simulator miss rates, while area information is available from the same CACTI table. The results show a classic tradeoff: very aggressive organizations can slightly improve AAT, but moderate associativity and size (such as 32KB, 4-way) deliver near-optimal AAT with lower expected area and energy cost than more aggressive fully associative alternatives.
+
+\pagebreak
+\section{Conclusion}
+This simulation project highlights foundational principles in computer architecture: while scaling cache size and associativity effectively suppresses capacity and conflict misses, there are profound diminishing returns accompanied by hit-time penalties. LRU proves an excellent practical replacement policy relative to theoretical Optimum, and L2 inclusion policies enforce trade-offs between simplified coherence states and L1 capacity effectiveness. The parameterized simulator reliably verifies these performance interactions across a modeled memory hierarchy.
+
+\end{document}

@@ -31,7 +31,9 @@ void PrintCacheContents(const string &name, const Cache &cache) {
 }
 
 int main(int argc, char *argv[]) {
+  // Checking if the arguments amount is correct
   if (argc != 9) {
+    // Amount of arguments were not correct
     cerr << "Usage: " << argv[0]
          << " <BLOCKSIZE> <L1_SIZE> <L1_ASSOC> <L2_SIZE> <L2_ASSOC> "
             "<REPLACEMENT_POLICY> <INCLUSION_PROPERTY> <trace_file>"
@@ -39,6 +41,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  // Gathering the arguments
   uint32_t blocksize = stoi(argv[1]);
   uint32_t l1_size = stoi(argv[2]);
   uint32_t l1_assoc = stoi(argv[3]);
@@ -48,6 +51,7 @@ int main(int argc, char *argv[]) {
   uint32_t inclusion = stoi(argv[7]);
   string trace_file = argv[8];
 
+  // Getting the replacement policy
   ReplacementPolicy policy = (ReplacementPolicy)policy_int;
 
   // Open trace file
@@ -55,12 +59,16 @@ int main(int argc, char *argv[]) {
   if (!trace.is_open()) {
     string alt_path = "MachineProblem1 5/traces/" + trace_file;
     trace.open(alt_path);
+    // Checking if the trace was opened properly
     if (!trace.is_open()) {
       cerr << "Error: Could not open trace file " << trace_file << endl;
       return 1;
     }
   }
 
+  // After this the trace was opened correctly
+
+  // Getting all of the entries in the trace
   vector<TraceEntry> entries;
   char op;
   uint32_t addr;
@@ -69,6 +77,7 @@ int main(int argc, char *argv[]) {
   }
   trace.close();
 
+  // Putting the future access if its perfectly done
   map<uint32_t, deque<uint32_t>> future_accesses;
   if (policy == OPTIMAL) {
     for (uint32_t i = 0; i < entries.size(); ++i) {
@@ -76,6 +85,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // initializing the l1 and l2 cache simulation
   Cache l1(l1_size, l1_assoc, blocksize, policy, 0);
   Cache *l2 = NULL;
   if (l2_size > 0) {
@@ -93,7 +103,7 @@ int main(int argc, char *argv[]) {
     trace_filename = trace_file.substr(last_slash + 1);
   }
 
-  // Print configuration
+  // Print configuration to the screen
   cout << "===== Simulator configuration =====" << endl;
   cout << "BLOCKSIZE:             " << dec << blocksize << endl;
   cout << "L1_SIZE:               " << l1_size << endl;
@@ -107,7 +117,7 @@ int main(int argc, char *argv[]) {
        << (inclusion == 0 ? "non-inclusive" : "inclusive") << endl;
   cout << "trace_file:            " << trace_filename << endl;
 
-  // Run simulation
+  // Run simulation proper
   for (uint32_t i = 0; i < entries.size(); ++i) {
     l1.Access(entries[i].addr, entries[i].op, i, future_accesses);
   }
@@ -118,10 +128,9 @@ int main(int argc, char *argv[]) {
     PrintCacheContents("L2", *l2);
   }
 
-  // Print results
+  // Print results of simulation
   CacheStats s1 = l1.GetStats();
-  double l1_miss_rate =
-      (double)(s1.read_misses + s1.write_misses) / (s1.reads + s1.writes);
+  double l1_miss_rate = (double)(s1.read_misses + s1.write_misses) / (s1.reads + s1.writes);
 
   cout << "===== Simulation results (raw) =====" << endl;
   cout << "a. number of L1 reads:        " << dec << s1.reads << endl;
@@ -137,6 +146,7 @@ int main(int argc, char *argv[]) {
   double l2_miss_rate = 0;
   uint32_t total_memory_traffic = 0;
 
+  // if the l2 exists, get the data
   if (l2) {
     CacheStats s2 = l2->GetStats();
     l2_reads = s2.reads;
@@ -152,6 +162,7 @@ int main(int argc, char *argv[]) {
     total_memory_traffic = s1.read_misses + s1.write_misses + s1.writebacks;
   }
 
+  // Print the l2 data no matter what
   cout << "g. number of L2 reads:        " << dec << l2_reads << endl;
   cout << "h. number of L2 read misses:  " << l2_read_misses << endl;
   cout << "i. number of L2 writes:       " << l2_writes << endl;
@@ -165,8 +176,11 @@ int main(int argc, char *argv[]) {
   cout << "m. total memory traffic:      " << dec << total_memory_traffic
        << endl;
 
-  if (l2)
+  // Cleaning up l2 cache pointers if it exists
+  if (l2) {
     delete l2;
+  }
 
+  // Program is done correctly!!
   return 0;
 }

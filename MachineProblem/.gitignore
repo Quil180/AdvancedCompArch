@@ -1,3 +1,6 @@
 *.o
 validation_output
 sim_cache
+valgrind_output
+graph_data
+*.zip

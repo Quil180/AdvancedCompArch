@@ -1,0 +1,101 @@
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% Command for Graph 1: L1 cache exploration: SIZE and ASSOC
+\newcommand{\plotGraphOne}[1][../graph_data/graph1/graph1.csv]{
+    \begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        title={Graph 1: L1 Cache Size and Associativity vs Miss Rate},
+        xlabel={$\log_2(\text{L1 Size})$},
+        ylabel={L1 Miss Rate},
+        legend pos=outer north east,
+        grid=both,
+        mark=auto
+    ]
+    \addplot table[x=size_log2, y=assoc_1, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_2, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_4, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_8, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_FA, col sep=comma] {#1};
+    \legend{Direct Mapped, 2-way, 4-way, 8-way, Fully Assoc.}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{L1 Miss Rate as Cache Size and Associativity increase.}
+    \label{fig:graph1}
+    \end{figure}
+}
+
+% Command for Graph 2: L1 Cache Size and Associativity on AAT
+\newcommand{\plotGraphTwo}[1][../graph_data/graph1/graph2.csv]{
+    \begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        title={Graph 2: L1 Cache Size and Associativity vs Average Access Time},
+        xlabel={$\log_2(\text{L1 Size})$},
+        ylabel={Average Access Time (AAT) in ns},
+        legend pos=outer north east,
+        grid=both,
+        mark=auto
+    ]
+    \addplot table[x=size_log2, y=assoc_1, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_2, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_4, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_8, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=assoc_FA, col sep=comma] {#1};
+    \legend{Direct Mapped, 2-way, 4-way, 8-way, Fully Assoc.}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Average Access Time (AAT) as Cache Size and Associativity increase.}
+    \label{fig:graph2}
+    \end{figure}
+}
+
+% Command for Graph 3: Replacement Policy Study
+\newcommand{\plotGraphThree}[1][../graph_data/graph3/graph3.csv]{
+    \begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        title={Graph 3: Replacement Policy Study on Average Access Time},
+        xlabel={$\log_2(\text{L1 Size})$},
+        ylabel={Average Access Time (AAT) in ns},
+        legend pos=outer north east,
+        grid=both,
+        mark=auto
+    ]
+    \addplot table[x=size_log2, y=LRU, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=FIFO, col sep=comma] {#1};
+    \addplot table[x=size_log2, y=Optimal, col sep=comma] {#1};
+    \legend{LRU, FIFO, Optimal}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Impact of Replacement Policies on Average Access Time.}
+    \label{fig:graph3}
+    \end{figure}
+}
+
+% Command for Graph 4: Inclusion Property Study
+\newcommand{\plotGraphFour}[1][../graph_data/graph4/graph4.csv]{
+    \begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        title={Graph 4: L2 Inclusion Property vs Average Access Time},
+        xlabel={$\log_2(\text{L2 Size})$},
+        ylabel={Average Access Time (AAT) in ns},
+        legend pos=outer north east,
+        grid=both,
+        mark=auto
+    ]
+    \addplot table[x=l2_size_log2, y=aat_noninc, col sep=comma] {#1};
+    \addplot table[x=l2_size_log2, y=aat_inc, col sep=comma] {#1};
+    \legend{Non-inclusive, Inclusive}
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Impact of L2 Inclusion Policy on Average Access Time.}
+    \label{fig:graph4}
+    \end{figure}
+}

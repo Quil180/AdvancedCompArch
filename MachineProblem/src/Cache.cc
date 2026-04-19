@@ -1,5 +1,6 @@
 #include "Cache.h"
 
+// Function that finds the log base 2 of any int
 static uint32_t log2_int(uint32_t n) {
   uint32_t res = 0;
   while (n >>= 1)
@@ -7,6 +8,7 @@ static uint32_t log2_int(uint32_t n) {
   return res;
 }
 
+// Constructor for the Cache class
 Cache::Cache(uint32_t size, uint32_t assoc, uint32_t blocksize,
              ReplacementPolicy policy, uint32_t inclusion)
     : size(size), assoc(assoc), blocksize(blocksize), policy(policy),
@@ -14,6 +16,7 @@ Cache::Cache(uint32_t size, uint32_t assoc, uint32_t blocksize,
       global_counter(0) {
 
   if (size == 0 || assoc == 0) {
+    // If size and associativity is 0, the rest of the variables can be default
     num_sets = 0;
     return;
   }
@@ -23,6 +26,7 @@ Cache::Cache(uint32_t size, uint32_t assoc, uint32_t blocksize,
   offset_bits = log2_int(blocksize);
   index_mask = num_sets - 1;
 
+  // Setting all sets to 0/default states
   sets.resize(num_sets, std::vector<Block>(assoc));
   for (uint32_t i = 0; i < num_sets; ++i) {
     for (uint32_t j = 0; j < assoc; ++j) {
@@ -35,29 +39,35 @@ Cache::Cache(uint32_t size, uint32_t assoc, uint32_t blocksize,
   }
 }
 
+// set finder via tag
 void Cache::FindTag(uint32_t addr, uint32_t &tag, uint32_t &index) {
   index = (addr >> offset_bits) & index_mask;
   tag = addr >> (offset_bits + index_bits);
 }
 
+// block finder via the found tag and index
 int Cache::FindBlock(uint32_t index, uint32_t tag) {
   for (uint32_t i = 0; i < assoc; ++i) {
     if (sets[index][i].valid && sets[index][i].tag == tag) {
       return (int)i;
     }
   }
+  // The block was not found
   return -1;
 }
 
+// Finding empty spot with index blah
 int Cache::FindEmptyWay(uint32_t index) {
   for (uint32_t i = 0; i < assoc; ++i) {
     if (!sets[index][i].valid) {
       return (int)i;
     }
   }
+  // We could not find an empty spot
   return -1;
 }
 
+// Function to select next removal victim...
 int Cache::SelectVictim(
     uint32_t index, uint32_t access_index,
     std::map<uint32_t, std::deque<uint32_t>> &future_accesses) {
@@ -117,9 +127,11 @@ int Cache::SelectVictim(
     }
     return victim;
   }
+  // No victim could be found or it somehow broke
   return 0;
 }
 
+// Updating the replacement state function
 void Cache::UpdateReplacementState(uint32_t index, int way, bool is_new_block) {
   if (policy == LRU) {
     sets[index][way].lru_counter = ++global_counter;
@@ -130,32 +142,42 @@ void Cache::UpdateReplacementState(uint32_t index, int way, bool is_new_block) {
   }
 }
 
+// The big boy function that tells if the access was a hit or miss
 bool Cache::Access(uint32_t addr, char op, uint32_t access_index,
                    std::map<uint32_t, std::deque<uint32_t>> &future_accesses) {
   uint32_t tag, index;
   FindTag(addr, tag, index);
 
-  if (op == 'r')
+  // Counting whether the operand was a read or write
+  if (op == 'r') {
     stats.reads++;
-  else
+  } else {
     stats.writes++;
+  }
 
+  // Find the block given the index and tag that we are given
   int way = FindBlock(index, tag);
 
   if (way != -1) { // Hit
     if (op == 'w')
       sets[index][way].dirty = true;
     UpdateReplacementState(index, way, false);
-    return true;
+    return true; // Return access was a hit
   } else { // Miss
-    if (op == 'r')
-      stats.read_misses++;
-    else
-      stats.write_misses++;
 
+    // Log that a miss occured with either a read or write for stats
+    if (op == 'r') {
+      stats.read_misses++;
+    } else {
+      stats.write_misses++;
+    }
+
+    // Find an empty block that the index can be placed into
     way = FindEmptyWay(index);
-    if (way == -1) { // Eviction needed
+    if (way == -1) { // Eviction is needed
+      // Find the victim that can be evicted
       way = SelectVictim(index, access_index, future_accesses);
+      // If the victim was dirty, simply overwrite it
       if (sets[index][way].dirty) {
         stats.writebacks++;
         if (next_level) {
@@ -166,7 +188,7 @@ bool Cache::Access(uint32_t addr, char op, uint32_t access_index,
         }
       }
 
-      // Inclusion check
+      // Inclusion check if l2 is inclusive of l1
       if (inclusion == 1 && prev_level) {
         uint32_t victim_addr =
             (sets[index][way].tag << (index_bits + offset_bits)) |
@@ -189,10 +211,12 @@ bool Cache::Access(uint32_t addr, char op, uint32_t access_index,
       next_level->Access(addr, 'r', access_index, future_accesses);
     }
 
+    // Return that a miss occured
     return false;
   }
 }
 
+// Helper function for invalidating an address
 void Cache::Invalidate(uint32_t addr, bool &was_dirty) {
   uint32_t tag, index;
   FindTag(addr, tag, index);
